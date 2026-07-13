@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FinSight AI — MSME Financial Health & Credit Intelligence</title>
+<style>
+  :root{
+    --teal:#0B6E5A; --teal-dark:#085445; --teal-light:#0E8A70;
+    --orange:#E8722A; --orange-soft:#FBE7D8;
+    --ink:#16302B; --slate:#5A6B66; --line:#E4ECE9;
+    --bg:#F5F8F7; --card:#FFFFFF;
+    --green:#1E9E6A; --amber:#E0A008; --red:#D9534F;
+    --shadow:0 2px 10px rgba(11,110,90,.08), 0 8px 28px rgba(11,110,90,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+  .app{max-width:1180px;margin:0 auto;padding:0 22px 40px}
+
+  /* Top bar */
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(100deg,var(--teal-dark),var(--teal) 55%,var(--teal-light));
+    color:#fff;padding:14px 22px;border-radius:0 0 16px 16px;box-shadow:var(--shadow)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.14);
+    display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25)}
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.2px}
+  .brand h1 span{color:#FFD9BF}
+  .brand p{font-size:11.5px;opacity:.85;font-weight:500}
+  .topright{display:flex;align-items:center;gap:14px;font-size:12.5px}
+  .pill{background:rgba(255,255,255,.15);padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.22)}
+  .rm{display:flex;align-items:center;gap:9px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--orange);display:flex;
+    align-items:center;justify-content:center;font-weight:700;font-size:13px}
+
+  /* Sub context bar */
+  .ctxbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 20px;margin-top:18px;box-shadow:var(--shadow)}
+  .biz{display:flex;align-items:center;gap:14px}
+  .biz-ic{width:46px;height:46px;border-radius:12px;background:var(--orange-soft);color:var(--orange);
+    display:flex;align-items:center;justify-content:center;font-size:22px}
+  .biz h2{font-size:18px}
+  .biz .meta{font-size:12px;color:var(--slate);margin-top:2px}
+  .sources{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .src{font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;background:#EAF4F1;color:var(--teal);
+    border:1px solid #D3E8E2;display:flex;align-items:center;gap:5px}
+  .src .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .consent{font-size:11px;color:var(--slate);margin-top:6px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;margin:18px 0 4px;flex-wrap:wrap}
+  .tab{padding:10px 18px;border-radius:10px 10px 0 0;background:transparent;border:none;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:var(--slate);font-family:inherit}
+  .tab.active{background:var(--card);color:var(--teal);box-shadow:0 -2px 6px rgba(11,110,90,.05)}
+  .panel{display:none;animation:fade .3s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .grid{display:grid;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+  .card h3{font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--teal);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px}
+  .card h3 .num{width:22px;height:22px;border-radius:6px;background:var(--teal);color:#fff;font-size:11px;
+    display:flex;align-items:center;justify-content:center}
+
+  /* Health tab layout */
+  .health-top{grid-template-columns:300px 1fr}
+  .overall{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    background:linear-gradient(160deg,var(--teal),var(--teal-dark));color:#fff}
+  .overall .ring{position:relative;width:180px;height:180px;margin:6px 0}
+  .overall .big{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .overall .big b{font-size:52px;line-height:1;font-weight:800}
+  .overall .big small{font-size:13px;opacity:.85;margin-top:2px}
+  .overall .label{font-size:12px;text-transform:uppercase;letter-spacing:1px;opacity:.9}
+  .overall .tag{margin-top:10px;background:rgba(255,255,255,.16);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600}
+
+  .dims{grid-template-columns:repeat(3,1fr);gap:14px}
+  .dim{border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fff}
+  .dim .dl{font-size:12px;color:var(--slate);font-weight:600;margin-bottom:9px;display:flex;justify-content:space-between}
+  .dim .dv{font-weight:800;font-size:15px}
+  .bar{height:7px;border-radius:6px;background:#EDF2F0;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:6px}
+
+  .kpis{grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .kpi{border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;background:#fff}
+  .kpi b{display:block;font-size:26px;font-weight:800;color:var(--ink)}
+  .kpi.money b{color:var(--teal)}
+  .kpi span{font-size:11.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .sub{font-size:11px;color:var(--green);font-weight:700;margin-top:3px}
+  .risk-low{color:var(--green)!important}
+
+  /* Explainability */
+  .shap{display:flex;flex-direction:column;gap:10px}
+  .shrow{display:grid;grid-template-columns:210px 1fr 54px;align-items:center;gap:12px;font-size:13px}
+  .shrow .fname{font-weight:600}
+  .shbar{position:relative;height:26px;background:#F1F5F4;border-radius:6px;display:flex;align-items:center}
+  .shfill{height:26px;border-radius:6px;position:absolute}
+  .shpos{background:var(--green);left:50%}
+  .shneg{background:var(--red);right:50%}
+  .shmid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:#CBD8D4;transform:translateX(-1px)}
+  .shval{font-weight:800;text-align:right}
+  .pos{color:var(--green)} .neg{color:var(--red)}
+  .legend{font-size:11.5px;color:var(--slate);margin-top:12px;display:flex;gap:18px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .sq{width:11px;height:11px;border-radius:3px}
+
+  /* Analyst */
+  .analyst{grid-template-columns:1fr 380px}
+  .summary-box{background:#F7FBFA;border:1px solid #DDEBE6;border-left:4px solid var(--teal);
+    border-radius:10px;padding:18px 20px;font-size:14.5px;line-height:1.6;color:#243B35}
+  .summary-box .stamp{font-size:11px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+    margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .verdict{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .vbadge{flex:1;min-width:150px;border-radius:10px;padding:13px 15px;border:1px solid var(--line)}
+  .vbadge .vt{font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.4px}
+  .vbadge .vv{font-size:16px;font-weight:800;margin-top:3px}
+
+  /* Chat */
+  .chat{display:flex;flex-direction:column;height:100%}
+  .chatwin{flex:1;display:flex;flex-direction:column;gap:11px;padding:4px 2px 12px;min-height:300px}
+  .msg{max-width:88%;padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.5}
+  .msg.user{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:#EEF4F2;color:var(--ink);border-bottom-left-radius:4px}
+  .msg.bot ul{margin:6px 0 0 16px} .msg.bot li{margin:2px 0}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .chip{font-size:12px;padding:7px 12px;border-radius:18px;background:#fff;border:1px solid var(--teal);
+    color:var(--teal);cursor:pointer;font-family:inherit;font-weight:600}
+  .chip:hover{background:var(--teal);color:#fff}
+
+  /* Loan products */
+  .loans{grid-template-columns:repeat(3,1fr);gap:12px}
+  .loan{border:1px solid var(--line);border-radius:11px;padding:14px;background:#fff}
+  .loan.reco{border:1.5px solid var(--orange);background:#FFF8F3}
+  .loan .lt{font-size:13px;font-weight:700}
+  .loan .ls{font-size:11.5px;color:var(--slate);margin-top:3px}
+  .loan .badge{display:inline-block;margin-top:9px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:12px}
+  .b-green{background:#E4F5EC;color:var(--green)} .b-orange{background:var(--orange-soft);color:var(--orange)}
+
+  /* What-if */
+  .whatif{grid-template-columns:1fr 340px}
+  .slider-row{margin-bottom:20px}
+  .slider-row label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px}
+  .slider-row label .sv{color:var(--teal);font-weight:800}
+  input[type=range]{width:100%;height:6px;border-radius:5px;background:#DCE8E4;outline:none;-webkit-appearance:none;appearance:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--teal);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .sim-out{background:linear-gradient(160deg,var(--teal),var(--teal-dark));color:#fff;text-align:center}
+  .sim-out .simscore{font-size:56px;font-weight:800;line-height:1}
+  .sim-out .simdelta{font-size:14px;margin-top:4px;font-weight:600}
+  .sim-out .simloan{font-size:22px;font-weight:800;margin-top:18px}
+  .sim-out .siml{font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:.6px}
+  .up{color:#B8F5D8} .down{color:#FFC9C6}
+  .note{font-size:11.5px;color:var(--slate);margin-top:14px;font-style:italic}
+
+  footer{text-align:center;font-size:11px;color:var(--slate);margin-top:26px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v2h18V6L12 2z" fill="#FFD9BF"/><rect x="4" y="9" width="2.6" height="8" fill="#fff"/><rect x="10.7" y="9" width="2.6" height="8" fill="#fff"/><rect x="17.4" y="9" width="2.6" height="8" fill="#fff"/><rect x="3" y="18" width="18" height="2.2" fill="#FFD9BF"/></svg>
+      </div>
+      <div>
+        <h1>FinSight <span>AI</span></h1>
+        <p>AI-Powered MSME Financial Health &amp; Credit Intelligence Platform</p>
+      </div>
+    </div>
+    <div class="topright">
+      <span class="pill">IDBI Innovate 2026</span>
+      <div class="rm">
+        <div class="avatar">RM</div>
+        <div><div style="font-weight:600">Credit Officer</div><div style="opacity:.8;font-size:11px">Relationship Manager</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BUSINESS CONTEXT ============ -->
+  <div class="ctxbar">
+    <div class="biz">
+      <div class="biz-ic">🏪</div>
+      <div>
+        <h2>ABC Traders</h2>
+        <div class="meta">MSME · GSTIN 29ABCDE1234F1Z5 · Loan application #IDBI-2026-0417</div>
+      </div>
+    </div>
+    <div>
+      <div class="sources">
+        <span class="src"><span class="dot"></span>GST</span>
+        <span class="src"><span class="dot"></span>UPI</span>
+        <span class="src"><span class="dot"></span>Account Aggregator</span>
+        <span class="src"><span class="dot"></span>EPFO</span>
+        <span class="src"><span class="dot"></span>Bank Statements</span>
+        <span class="src"><span class="dot"></span>Utility &amp; Invoices</span>
+      </div>
+      <div class="consent">🔒 Alternate data fetched with customer consent · ~120 engineered features · Assessed in real time</div>
+    </div>
+  </div>
+
+  <!-- ============ TABS ============ -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab(0,this)">Financial Health Card</button>
+    <button class="tab" onclick="showTab(1,this)">Explainable AI</button>
+    <button class="tab" onclick="showTab(2,this)">AI Analyst &amp; Chat</button>
+    <button class="tab" onclick="showTab(3,this)">What-If Simulator</button>
+  </div>
+
+  <!-- ===== TAB 1: HEALTH CARD ===== -->
+  <div class="panel active">
+    <div class="grid health-top">
+      <div class="card overall">
+        <div class="label">Financial Health</div>
+        <div class="ring">
+          <svg width="180" height="180" viewBox="0 0 180 180">
+            <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="14"/>
+            <circle cx="90" cy="90" r="78" fill="none" stroke="#FFD9BF" stroke-width="14" stroke-linecap="round"
+              stroke-dasharray="490" stroke-dashoffset="54" transform="rotate(-90 90 90)"/>
+          </svg>
+          <div class="big"><b>89</b><small>/ 100</small></div>
+        </div>
+        <div class="tag">Healthy · Low Risk</div>
+      </div>
+
+      <div class="card">
+        <h3><span class="num">3</span>Multidimensional Health Score</h3>
+        <div class="grid dims" id="dims"></div>
+      </div>
+    </div>
+
+    <div class="grid kpis">
+      <div class="kpi"><span>Fraud Risk</span><b class="risk-low">Very Low</b><div class="sub">Isolation Forest · anomaly score 0.10</div></div>
+      <div class="kpi money"><span>Recommended Loan</span><b>₹18 L</b><div class="sub">Working Capital</div></div>
+      <div class="kpi"><span>Model Confidence</span><b>94%</b><div class="sub">XGBoost + LightGBM ensemble</div></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3><span class="num">6</span>Loan Recommendation Engine</h3>
+      <div class="grid loans">
+        <div class="loan reco"><div class="lt">Working Capital Loan</div><div class="ls">₹18 Lakhs · Standard interest category</div><span class="badge b-orange">★ Best fit</span></div>
+        <div class="loan"><div class="lt">Invoice Financing</div><div class="ls">Against verified UPI &amp; invoice inflows</div><span class="badge b-green">Eligible</span></div>
+        <div class="loan"><div class="lt">Machinery Loan</div><div class="ls">Subject to expansion plan review</div><span class="badge b-green">Eligible</span></div>
+        <div class="loan"><div class="lt">Business Expansion</div><div class="ls">Growth score supports scale-up</div><span class="badge b-green">Eligible</span></div>
+        <div class="loan"><div class="lt">Vehicle Loan</div><div class="ls">Optional add-on facility</div><span class="badge b-green">Eligible</span></div>
+        <div class="loan"><div class="lt">Credit Limit / OD</div><div class="ls">Dynamic limit from cash-flow stability</div><span class="badge b-green">Eligible</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: EXPLAINABLE AI ===== -->
+  <div class="panel">
+    <div class="card">
+      <h3><span class="num">4</span>Why this score? — SHAP Feature Contributions</h3>
+      <div class="shap" id="shap"></div>
+      <div class="legend">
+        <span><span class="sq" style="background:var(--green)"></span>Increases score</span>
+        <span><span class="sq" style="background:var(--red)"></span>Decreases score</span>
+        <span>Base value 62 → Overall 89</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;background:#F7FBFA">
+      <h3>Officer Trust Layer</h3>
+      <p style="font-size:14px;color:#2C443E">No black box. Every point in the score traces to an auditable driver from GST, UPI, EPFO and Account-Aggregator data — using SHAP, LIME and feature importance — so the credit officer can defend the decision for regulatory and compliance review.</p>
+    </div>
+  </div>
+
+  <!-- ===== TAB 3: AI ANALYST & CHAT ===== -->
+  <div class="panel">
+    <div class="grid analyst">
+      <div class="card">
+        <h3><span class="num">5</span>LLM Financial Analyst — Lending Summary</h3>
+        <div class="summary-box">
+          <div class="stamp">✦ Generated by LLM (Amazon Bedrock)</div>
+          ABC Traders demonstrates healthy monthly revenue growth with consistent GST compliance and stable employee retention. Cash inflows through UPI have increased steadily over the past six months, suggesting business expansion. While liquidity remains adequate, a moderate rise in debt obligations warrants monitoring. Based on current indicators, the business appears suitable for a medium-sized working capital loan with routine post-disbursement monitoring.
+        </div>
+        <div class="verdict">
+          <div class="vbadge"><div class="vt">Strengths</div><div class="vv" style="color:var(--green)">Revenue · GST · Retention</div></div>
+          <div class="vbadge"><div class="vt">Watch</div><div class="vv" style="color:var(--amber)">Rising debt</div></div>
+          <div class="vbadge"><div class="vt">Recommendation</div><div class="vv" style="color:var(--teal)">Approve w/ monitoring</div></div>
+        </div>
+      </div>
+
+      <div class="card chat">
+        <h3><span class="num">7</span>AI Chat Assistant — Financial Coach</h3>
+        <div class="chatwin" id="chatwin">
+          <div class="msg bot">Hi! I can explain ABC Traders' score in plain English, or suggest what would improve it. Ask me anything.</div>
+        </div>
+        <div class="chips">
+          <button class="chip" onclick="ask('why')">Why is the score 89?</button>
+          <button class="chip" onclick="ask('improve')">What should I improve?</button>
+          <button class="chip" onclick="ask('debt')">Is the debt a concern?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB 4: WHAT-IF ===== -->
+  <div class="panel">
+    <div class="grid whatif">
+      <div class="card">
+        <h3><span class="num">★</span>Digital Twin &amp; "What-If" Simulator</h3>
+        <div class="slider-row">
+          <label>Monthly revenue change <span class="sv" id="v-rev">+0%</span></label>
+          <input type="range" id="s-rev" min="-30" max="30" value="0" oninput="sim()">
+        </div>
+        <div class="slider-row">
+          <label>GST filing delay (days) <span class="sv" id="v-gst">0</span></label>
+          <input type="range" id="s-gst" min="0" max="30" value="0" oninput="sim()">
+        </div>
+        <div class="slider-row">
+          <label>Employees hired <span class="sv" id="v-emp">+0</span></label>
+          <input type="range" id="s-emp" min="0" max="20" value="0" oninput="sim()">
+        </div>
+        <div class="slider-row">
+          <label>Debt obligations change <span class="sv" id="v-debt">+0%</span></label>
+          <input type="range" id="s-debt" min="-20" max="40" value="0" oninput="sim()">
+        </div>
+        <p class="note">Simulate how the health score and eligible loan respond before disbursement — an early-warning tool for relationship managers.</p>
+      </div>
+      <div class="card sim-out">
+        <div class="siml">Projected Health Score</div>
+        <div class="simscore" id="simscore">89</div>
+        <div class="simdelta" id="simdelta">Baseline</div>
+        <div class="siml" style="margin-top:20px">Eligible Loan</div>
+        <div class="simloan" id="simloan">₹18.0 L</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>FinSight AI — Prototype · Team Ignite AI Labs · IDBI Innovate 2026 · Demo data (ABC Traders)</footer>
+</div>
+
+<script>
+  // ---- Dimensions from the Financial Health Card + Module 3 ----
+  const dims = [
+    ["Business Stability",91],["Cash Flow",88],["Revenue Growth",84],
+    ["Compliance",97],["Employee Stability",90],["Liquidity",81],
+    ["Digital Adoption",88],["Revenue Stability",91],["Growth Momentum",78]
+  ];
+  function col(v){ return v>=85?'var(--green)': v>=70?'var(--teal-light)': v>=50?'var(--amber)':'var(--red)'; }
+  document.getElementById('dims').innerHTML = dims.map(([n,v])=>`
+    <div class="dim">
+      <div class="dl"><span>${n}</span><span class="dv" style="color:${col(v)}">${v}</span></div>
+      <div class="bar"><i style="width:${v}%;background:${col(v)}"></i></div>
+    </div>`).join('');
+
+  // ---- SHAP factors ----
+  const shap=[["Increasing Revenue",18],["Excellent UPI Growth",14],["GST Filing Consistency",12],
+    ["Stable Employee Count",10],["High Debt",-7],["Seasonal Revenue Drop",-5]];
+  const maxAbs=18;
+  document.getElementById('shap').innerHTML = shap.map(([n,v])=>{
+    const w=Math.abs(v)/maxAbs*50;
+    const fill = v>0? `<div class="shfill shpos" style="width:${w}%"></div>`
+                     : `<div class="shfill shneg" style="width:${w}%"></div>`;
+    return `<div class="shrow">
+      <div class="fname">${n}</div>
+      <div class="shbar"><div class="shmid"></div>${fill}</div>
+      <div class="shval ${v>0?'pos':'neg'}">${v>0?'+':''}${v}</div>
+    </div>`;
+  }).join('');
+
+  // ---- Tabs ----
+  const panels=document.querySelectorAll('.panel');
+  function showTab(i,btn){
+    panels.forEach((p,k)=>p.classList.toggle('active',k===i));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // ---- Chat ----
+  const answers={
+    why:{q:"Why is the score 89?",a:`The 89/100 is driven mainly by <b>increasing revenue (+18)</b>, <b>strong UPI growth (+14)</b> and <b>consistent GST filing (+12)</b>, with <b>stable employee count (+10)</b>. Rising debt (−7) and a seasonal revenue dip (−5) pull it down slightly.`},
+    improve:{q:"What should I improve?",a:`To lift the score, focus on:<ul><li>Increase average monthly bank balance</li><li>File GST before the due date</li><li>Reduce overdue invoices</li><li>Maintain employee stability</li></ul>`},
+    debt:{q:"Is the debt a concern?",a:`Liquidity is adequate, but debt obligations have risen moderately (−7 impact). It's not a rejection factor — the recommendation is <b>approve with routine post-disbursement monitoring</b>.`}
+  };
+  function add(cls,html){const w=document.getElementById('chatwin');const d=document.createElement('div');
+    d.className='msg '+cls;d.innerHTML=html;w.appendChild(d);w.scrollTop=w.scrollHeight;}
+  function ask(k){add('user',answers[k].q);setTimeout(()=>add('bot',answers[k].a),150);}
+
+  // ---- What-if simulator ----
+  const $=id=>document.getElementById(id);
+  function sim(){
+    const rev=+$('s-rev').value, gst=+$('s-gst').value, emp=+$('s-emp').value, debt=+$('s-debt').value;
+    $('v-rev').textContent=(rev>=0?'+':'')+rev+'%';
+    $('v-gst').textContent=gst;
+    $('v-emp').textContent='+'+emp;
+    $('v-debt').textContent=(debt>=0?'+':'')+debt+'%';
+    let score=89 + rev*0.35 - gst*0.30 + emp*0.25 - debt*0.30;
+    score=Math.max(20,Math.min(99,Math.round(score)));
+    const loan=Math.max(0,(18*(1+ (score-89)/60))).toFixed(1);
+    $('simscore').textContent=score;
+    $('simloan').textContent='₹'+loan+' L';
+    const d=score-89;
+    $('simdelta').innerHTML = d===0?'Baseline'
+      : d>0?`<span class="up">▲ +${d} vs baseline</span>`:`<span class="down">▼ ${d} vs baseline</span>`;
+  }
+</script>
+</body>
+</html>
